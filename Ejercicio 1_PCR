@@ -1,0 +1,43 @@
+#Creador: Isabel Pérez
+#Análisis de datos de PCR
+
+#install.packages ("pacman")
+
+library("pacman") #para activar p_laod
+
+p_load ("dplyr", 
+        "ggplot2", 
+        "readr")
+datos_PCR <- read.csv(file="https://raw.githubusercontent.com/ManuelLaraMVZ/Transcript-mica/main/Genes.csv")
+head(datos_PCR)
+
+Promedios <- datos_PCR %>%
+  mutate(Prom_Cx=(C1+C2+C3)/3) %>%
+  mutate(Prom_Tx=(T1+T2+T3)/3) %>% 
+  select(1,8,9)
+
+Promedios
+
+Tratamiento <- datos_PCR %>%
+  mutate(Prom_Tx=(T1+T2+T3)/3)
+
+Tratamiento
+ # %>% control shift m (significa: a lo que acabamos de hacer agregalo y lo de abajo)
+#== es identico
+#base de datos llamada promedio, seleccionas columna con dicho nombre para eso se usa $
+
+Gen_endogeno <- Promedios %>% 
+  filter(Gen=="B-actina") #filtramos de la columna Gen la celda B actina
+
+Gen_endogeno 
+
+Delta_CT <- Promedios %>% 
+  mutate(DCT_Cx = Promedios$Prom_Cx-Gen_endogeno$Prom_Cx,
+         DCT_Tx = Promedios$Prom_Tx-Gen_endogeno$Prom_Tx) %>% 
+  mutate(DosDCT_Cx = 2^(-DCT_Cx)) %>% 
+  mutate(DosDCT_TX = 2^(-DCT_Tx)) %>% 
+  mutate(DosDDCT = DosDCT_TX/DosDCT_Cx)
+
+Delta_CT
+
+write.csv(Delta_CT, file="Ejercicio_PCR.CSV")
